@@ -1,0 +1,14 @@
+## 2. Linear regression
+
+```{r}
+model_linear <- lm(medv ~ ., data = data)
+par(mfrow=c(2,2))
+plot(model_linear)
+summ(model_linear)
+
+plot_summs(model_linear)
+vif(model_linear) #tax (value of vif = 9) is deleted
+
+
+```
+
