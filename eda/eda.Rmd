@@ -1,0 +1,8 @@
+### 1. EDA
+
+```{r}
+ggpairs(data, columns = 1:ncol(data))
+
+corrplot(cor(data))
+
+```
