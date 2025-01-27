@@ -1,0 +1,59 @@
+## 4.CV Lasso
+
+```{r}
+model_lasso <- train(medv ~ ., 
+                     data = data, 
+                     method = "glmnet", 
+                     preProcess = c("center", "scale"), 
+                     metric = "RMSE",
+                     maximize = F,
+                     trControl = ctrl, 
+                     tuneGrid = expand.grid(alpha = 1,
+                                            lambda = parameters))
+
+
+model_lasso$results %>%
+  ggplot(aes(x = lambda, y = RMSE)) + 
+  geom_line(col = "grey55") + 
+  geom_point(size = 1, col = "green") +
+  geom_vline(xintercept = model_lasso[["bestTune"]][["lambda"]], 
+             col = "red",linetype="dashed") +
+  geom_hline(yintercept = min(model_lasso[["results"]][["RMSE"]]),
+             col = "deepskyblue3",linetype="dashed")+
+  labs(title = "Boston Dataset - Lasso Regression", 
+       subtitle = "Selecting shrinkage parameter with Repeated k-fold cross-validation",
+       y = "CV RMSE",
+       x = "λ")+
+  theme_minimal()
+```
+
+### 4.1 Best Lasso by CV
+
+```{r}
+# coefficents  L1 norm & lambda
+plot(model_lasso$finalModel, label = T, lwd = 2)+
+legend("bottomright", lwd = 1, col = 1:13, legend = colnames(newx), cex = .6)
+
+plot(model_lasso$finalModel, xvar="lambda",label = T, lwd = 2)+
+legend("bottomright", lwd = 1, col = 1:13, legend = colnames(newx), cex = .6)
+
+# Best lambda 
+lassolambda = model_lasso$bestTune$lambda
+
+#  importance plot variables
+plot(varImp(model_lasso,scale=TRUE,lambda = lassolambda))
+
+# predict from train object
+predLasso = predict.train(model_lasso,fitbest = TRUE)
+
+# predicted vs observed
+data.frame(predLasso,data$medv)%>%
+ggplot(aes(y = data$medv, x = predLasso)) +          
+           geom_point() +      
+           geom_abline(intercept = 0, slope = 1,
+                       color = "red", size = .8)+
+  ggtitle("Lasso: Predicted Vs Observed")+
+  xlab("Observed")+
+  ylab("Predicted")+
+  theme_minimal()
+```
